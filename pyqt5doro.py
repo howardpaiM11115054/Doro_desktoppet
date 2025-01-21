@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt, QTimer, QPropertyAnimation, QPoint
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QMenu
 import os
@@ -13,6 +13,7 @@ class Deskpet(QWidget):
         super(Deskpet, self).__init__(parent)
 
         # Pet counters
+        self.stop=False
         self.sleep_counter = 0
         self.dark_counter = 0
         self.death_counter=0
@@ -39,6 +40,13 @@ class Deskpet(QWidget):
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(100)  # 每 100 毫秒更新一幀
 
+        # 定時器用於桌寵移動
+        self.timer_move = QTimer(self)
+        
+        self.timer_move.timeout.connect(self.random_move)
+        self.timer_move.start(2000)  # 每2秒移動一次
+
+    
     def load_frames(self, folder):
         """加載所有動畫類型的幀"""
         frames = {
@@ -143,10 +151,16 @@ class Deskpet(QWidget):
         # 添加操作（QAction）
         action_exit = menu.addAction("EXIT")  # 添加一個 "退出" 選項
         action_kill = menu.addAction("Kill")
+        action_stop = menu.addAction("Stop")
+        action_move = menu.addAction("move")
         # 在鼠標位置顯示菜單
         action = menu.exec_(self.mapToGlobal(event.pos()))
 
         # 判斷選擇的選項
+        if action == action_move:
+            self.stop=False
+        if action == action_stop:
+            self.stop=True
         if action ==action_kill:
             self.animation_type = 'death'  # 切換動畫類型為 'death'
             self.current_frame = 0  # 重置動畫幀索引，從頭開始播放動畫
@@ -155,7 +169,24 @@ class Deskpet(QWidget):
         if action == action_exit:
             self.close() 
             sys.exit(app.exec_()) # 如果選擇了 "退出"，則關閉窗口
+    def random_move(self):
+        """讓桌寵隨機移動"""
+        if self.stop==False:
+            screen_geometry = QApplication.primaryScreen().availableGeometry()
+            screen_width = screen_geometry.width()
+            screen_height = screen_geometry.height()
 
+            # 隨機新位置
+            new_x = random.randint(0, screen_width - self.width())
+            new_y = random.randint(0, screen_height - self.height())
+            
+            # 動畫移動
+            self.animation = QPropertyAnimation(self, b"pos")
+            self.animation.setDuration(2000)  # 動畫持續時間 (毫秒)
+            self.animation.setEndValue(QPoint(new_x, new_y))
+            self.animation.start()
+        else:
+            pass
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
