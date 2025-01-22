@@ -1,6 +1,7 @@
 from PyQt5.QtCore import Qt, QTimer, QPropertyAnimation, QPoint
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QMenu
+from PyQt5 import QtGui
 import os
 import sys
 import random
@@ -13,10 +14,12 @@ class Deskpet(QWidget):
         super(Deskpet, self).__init__(parent)
 
         # Pet counters
+        self.against=0
         self.stop=False
         self.sleep_counter = 0
         self.dark_counter = 0
         self.death_counter=0
+        self.nope_counter=0
         self.animation_type = 'walk'  # animation type
 
         # window for invisible
@@ -54,10 +57,11 @@ class Deskpet(QWidget):
             'dark': [],
             'death': [],
             'sleep': [],
-            'death':[]
+            'death':[],
+            'Nope':[]
         }
 
-        animation_types = ['walk', 'dark', 'death', 'sleep','death']
+        animation_types = ['walk', 'dark', 'death', 'sleep','death','Nope']
         for animation in animation_types:
             animation_folder = os.path.join(folder, animation)
             num_of_frames = len(os.listdir(animation_folder))-1
@@ -66,7 +70,7 @@ class Deskpet(QWidget):
                 if os.path.exists(path):
                     pixmap = QPixmap(path)
                     scaled_pixmap = pixmap.scaled(
-                        pixmap.width() * 3, pixmap.height() * 3, Qt.KeepAspectRatio
+                        pixmap.width() * 4, pixmap.height() * 4, Qt.KeepAspectRatio
                     )
                     frames[animation].append(scaled_pixmap)
                 else:
@@ -87,7 +91,10 @@ class Deskpet(QWidget):
             self.dark_counter -= 1
             self.animation_type = 'dark'
             return
-
+        if self.nope_counter > 0:
+            self.nope_counter -= 1
+            self.animation_type = 'Nope'
+            return
         # 隨機選擇動畫類型
         if random.randint(1, 200) == 2:
             self.animation_type = 'sleep'
@@ -125,15 +132,24 @@ class Deskpet(QWidget):
 
     def mouseMoveEvent(self, event):
         """拖動窗口"""
+       
         if hasattr(self, "old_pos") and self.old_pos is not None:
-            delta = event.globalPos() - self.old_pos
-            self.move(self.x() + delta.x(), self.y() + delta.y())
-            self.old_pos = event.globalPos()  # 更新舊位置
+                delta = event.globalPos() - self.old_pos
+                self.move(self.x() + delta.x(), self.y() + delta.y())
+                self.old_pos = event.globalPos()  # 更新舊位置
+                self.against+=1
+        
+            
 
     def mouseReleaseEvent(self, event):
         """釋放滑鼠"""
         if event.button() == Qt.LeftButton:
-            self.old_pos = None  # 清空舊位置
+            self.old_pos = None 
+            self.animation_type = 'Nope'  # 切換動畫類型為 'death'
+            self.current_frame = 0  # 重置動畫幀索引，從頭開始播放動畫
+            self.nope_counter=30
+            self.move(self.x() , self.y() )#反抗
+            self.against-=1 # 清空舊位置
     # def mousePressEvent(self, event): 這樣會沒辦法拉
     #     """左鍵按下事件"""
     #     if event.button() == Qt.LeftButton:  # 檢查是否是左鍵
@@ -146,16 +162,31 @@ class Deskpet(QWidget):
     def contextMenuEvent(self, event):
         """右鍵菜單事件"""
         # 創建一個 QMenu
+        self.setStyleSheet("QMenu{background:rgb(255,102,204);}"
+                           "QMenu::item{background:rgb(255,189,255);}")
         menu = QMenu(self)
+        
 
         # 添加操作（QAction）
         action_exit = menu.addAction("EXIT")  # 添加一個 "退出" 選項
-        action_kill = menu.addAction("Kill")
+        action_kill = menu.addAction("Kill") 
         action_stop = menu.addAction("Stop")
-        action_move = menu.addAction("move")
+        action_move = menu.addAction("Move")
+        #set icon
+        '''add a label'''
+        path_kill=os.path.join('img','icon','Kill.png')
+        action_kill.setIcon(QtGui.QIcon(path_kill))
+        path_exit=os.path.join('img','icon','Exit.png')
+        action_exit.setIcon(QtGui.QIcon(path_exit))
+        path_stop=os.path.join('img','icon','Stop.png')
+        action_stop.setIcon(QtGui.QIcon(path_stop))
+        path_move=os.path.join('img','icon','Move.png')
+        action_move.setIcon(QtGui.QIcon(path_move))
+
+
         # 在鼠標位置顯示菜單
         action = menu.exec_(self.mapToGlobal(event.pos()))
-
+        
         # 判斷選擇的選項
         if action == action_move:
             self.stop=False
@@ -171,7 +202,7 @@ class Deskpet(QWidget):
             sys.exit(app.exec_()) # 如果選擇了 "退出"，則關閉窗口
     def random_move(self):
         """讓桌寵隨機移動"""
-        if self.stop==False:
+        if self.stop==False and self.animation_type=='walk':
             screen_geometry = QApplication.primaryScreen().availableGeometry()
             screen_width = screen_geometry.width()
             screen_height = screen_geometry.height()
