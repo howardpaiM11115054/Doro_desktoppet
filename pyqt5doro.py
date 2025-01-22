@@ -79,6 +79,12 @@ class Deskpet(QWidget):
 
     def animation_types(self):
         """更新當前的動畫類型"""
+        if self.nope_counter > 0:
+            self.sleep_counter=0
+            self.dark_counter=0
+            self.nope_counter -= 1
+            self.animation_type = 'Nope'
+            return
         if self.death_counter > 0:
             self.death_counter -= 1
             self.animation_type = 'death'
@@ -91,10 +97,7 @@ class Deskpet(QWidget):
             self.dark_counter -= 1
             self.animation_type = 'dark'
             return
-        if self.nope_counter > 0:
-            self.nope_counter -= 1
-            self.animation_type = 'Nope'
-            return
+        
         # 隨機選擇動畫類型
         if random.randint(1, 200) == 2:
             self.animation_type = 'sleep'
@@ -144,10 +147,11 @@ class Deskpet(QWidget):
     def mouseReleaseEvent(self, event):
         """釋放滑鼠"""
         if event.button() == Qt.LeftButton:
-            self.old_pos = None 
             self.animation_type = 'Nope'  # 切換動畫類型為 'death'
             self.current_frame = 0  # 重置動畫幀索引，從頭開始播放動畫
             self.nope_counter=30
+            self.old_pos = None 
+            
             self.move(self.x() , self.y() )#反抗
             self.against-=1 # 清空舊位置
     # def mousePressEvent(self, event): 這樣會沒辦法拉
@@ -162,8 +166,9 @@ class Deskpet(QWidget):
     def contextMenuEvent(self, event):
         """右鍵菜單事件"""
         # 創建一個 QMenu
-        self.setStyleSheet("QMenu{background:rgb(255,102,204);}"
-                           "QMenu::item{background:rgb(255,189,255);}")
+        self.setStyleSheet("QMenu{background:rgb(255,102,204);margin: 0;padding: 5px;border-radius: 20px;}"
+                           "QMenu::item{background:rgb(255,189,255);}"
+                           "QMenu::separator{height:9px}")
         menu = QMenu(self)
         
 
