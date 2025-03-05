@@ -140,6 +140,12 @@
   ('gettext',
    'D:\\Users\\er050\\AppData\\Local\\Programs\\Python\\Python310\\lib\\gettext.py',
    'PYMODULE'),
+<<<<<<< HEAD
+=======
+  ('glob',
+   'D:\\Users\\er050\\AppData\\Local\\Programs\\Python\\Python310\\lib\\glob.py',
+   'PYMODULE'),
+>>>>>>> 255e758 (add timer and sound when time out)
   ('gzip',
    'D:\\Users\\er050\\AppData\\Local\\Programs\\Python\\Python310\\lib\\gzip.py',
    'PYMODULE'),
@@ -233,6 +239,12 @@
   ('selectors',
    'D:\\Users\\er050\\AppData\\Local\\Programs\\Python\\Python310\\lib\\selectors.py',
    'PYMODULE'),
+<<<<<<< HEAD
+=======
+  ('shlex',
+   'D:\\Users\\er050\\AppData\\Local\\Programs\\Python\\Python310\\lib\\shlex.py',
+   'PYMODULE'),
+>>>>>>> 255e758 (add timer and sound when time out)
   ('shutil',
    'D:\\Users\\er050\\AppData\\Local\\Programs\\Python\\Python310\\lib\\shutil.py',
    'PYMODULE'),
@@ -257,6 +269,12 @@
   ('tarfile',
    'D:\\Users\\er050\\AppData\\Local\\Programs\\Python\\Python310\\lib\\tarfile.py',
    'PYMODULE'),
+<<<<<<< HEAD
+=======
+  ('tempfile',
+   'D:\\Users\\er050\\AppData\\Local\\Programs\\Python\\Python310\\lib\\tempfile.py',
+   'PYMODULE'),
+>>>>>>> 255e758 (add timer and sound when time out)
   ('textwrap',
    'D:\\Users\\er050\\AppData\\Local\\Programs\\Python\\Python310\\lib\\textwrap.py',
    'PYMODULE'),
@@ -284,6 +302,12 @@
   ('uu',
    'D:\\Users\\er050\\AppData\\Local\\Programs\\Python\\Python310\\lib\\uu.py',
    'PYMODULE'),
+<<<<<<< HEAD
+=======
+  ('webbrowser',
+   'D:\\Users\\er050\\AppData\\Local\\Programs\\Python\\Python310\\lib\\webbrowser.py',
+   'PYMODULE'),
+>>>>>>> 255e758 (add timer and sound when time out)
   ('zipfile',
    'D:\\Users\\er050\\AppData\\Local\\Programs\\Python\\Python310\\lib\\zipfile.py',
    'PYMODULE'),

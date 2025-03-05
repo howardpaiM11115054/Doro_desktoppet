@@ -1,18 +1,19 @@
 from PyQt5.QtCore import Qt, QTimer, QPropertyAnimation, QPoint
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QMenu
+from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QMenu,QMessageBox, QMainWindow, QAction
+import webbrowser
 from PyQt5 import QtGui
+import timer_win
 import os
 import sys
 import random
-
 
 class Deskpet(QWidget):
     tool_name = 'Doro'
 
     def __init__(self, parent=None, **kwargs):
         super(Deskpet, self).__init__(parent)
-
+        self.clocktimer=QTimer
         # Pet counters
         self.against=0
         self.stop=False
@@ -20,6 +21,7 @@ class Deskpet(QWidget):
         self.dark_counter = 0
         self.death_counter=0
         self.nope_counter=0
+        self.timer_counter=0
         self.animation_type = 'walk'  # animation type
 
         # window for invisible
@@ -48,7 +50,26 @@ class Deskpet(QWidget):
         
         self.timer_move.timeout.connect(self.random_move)
         self.timer_move.start(2000)  # 每2秒移動一次
+    def start_timer(self):
+        """開始倒數計時"""
+        try:
+            input_time = int(self.input_box.text())  # 取得輸入的秒數
+            if input_time <= 0:
+                raise ValueError  # 確保輸入為正數
+            self.remaining_time = input_time
+            self.timer_label.setText(f"剩餘時間: {self.remaining_time} 秒")
+            self.clocktimer.start(1000)  # 每秒更新一次
+        except ValueError:
+            QMessageBox.warning(self, "輸入錯誤", "請輸入有效的正整數！")
 
+    def update_timer(self):
+        """更新倒計時"""
+        if self.remaining_time > 0:
+            self.remaining_time -= 1
+            self.timer_label.setText(f"剩餘時間: {self.remaining_time} 秒")
+        else:
+            self.timer_label.setText("時間到！")
+            self.clocktimer.stop()  # 停止計時器
     
     def load_frames(self, folder):
         """加載所有動畫類型的幀"""
@@ -58,10 +79,11 @@ class Deskpet(QWidget):
             'death': [],
             'sleep': [],
             'death':[],
-            'Nope':[]
+            'Nope':[],
+            'Timer':[]
         }
 
-        animation_types = ['walk', 'dark', 'death', 'sleep','death','Nope']
+        animation_types = ['walk', 'dark', 'death', 'sleep','death','Nope','Timer']
         for animation in animation_types:
             animation_folder = os.path.join(folder, animation)
             num_of_frames = len(os.listdir(animation_folder))-1
@@ -79,6 +101,15 @@ class Deskpet(QWidget):
 
     def animation_types(self):
         """更新當前的動畫類型"""
+        if self.timer_counter>0:
+            self.animation_type ='Timer'
+            return
+        if self.nope_counter > 0:
+            self.sleep_counter=0
+            self.dark_counter=0
+            self.nope_counter -= 1
+            self.animation_type = 'Nope'
+            return
         if self.nope_counter > 0:
             self.sleep_counter=0
             self.dark_counter=0
@@ -97,6 +128,7 @@ class Deskpet(QWidget):
             self.dark_counter -= 1
             self.animation_type = 'dark'
             return
+        
         
         # 隨機選擇動畫類型
         if random.randint(1, 200) == 2:
@@ -152,6 +184,8 @@ class Deskpet(QWidget):
             self.nope_counter=30
             self.old_pos = None 
             
+            self.old_pos = None 
+            
             self.move(self.x() , self.y() )#反抗
             self.against-=1 # 清空舊位置
     # def mousePressEvent(self, event): 這樣會沒辦法拉
@@ -162,10 +196,16 @@ class Deskpet(QWidget):
     #         self.current_frame = 0  # 重置動畫幀索引，從頭開始播放動畫
         
 
-
+    def open_website(self):
+        """用默認瀏覽器打開網站"""
+        url = "https://github.com/howardpaiM11115054/Doro_desktoppet_exe.git"  # 替換為您的網站連結
+        webbrowser.open(url)
     def contextMenuEvent(self, event):
         """右鍵菜單事件"""
         # 創建一個 QMenu
+        self.setStyleSheet("QMenu{background:rgb(255,102,204);margin: 0;padding: 5px;border-radius: 20px;}"
+                           "QMenu::item{background:rgb(255,189,255);}"
+                           "QMenu::separator{height:9px}")
         self.setStyleSheet("QMenu{background:rgb(255,102,204);margin: 0;padding: 5px;border-radius: 20px;}"
                            "QMenu::item{background:rgb(255,189,255);}"
                            "QMenu::separator{height:9px}")
@@ -177,6 +217,11 @@ class Deskpet(QWidget):
         action_kill = menu.addAction("Kill") 
         action_stop = menu.addAction("Stop")
         action_move = menu.addAction("Move")
+        action_timer=menu.addAction("time")
+        action_link = menu.addAction("github")
+
+        # 為 action_link 綁定觸發事件
+        action_link.triggered.connect(self.open_website)
         #set icon
         '''add a label'''
         path_kill=os.path.join('img','icon','Kill.png')
@@ -187,6 +232,11 @@ class Deskpet(QWidget):
         action_stop.setIcon(QtGui.QIcon(path_stop))
         path_move=os.path.join('img','icon','Move.png')
         action_move.setIcon(QtGui.QIcon(path_move))
+        path_link=os.path.join('img','icon','GitHub.png')
+        action_link.setIcon(QtGui.QIcon(path_link))
+        path_timer=os.path.join('img','icon','Timer.png')
+        action_timer.setIcon(QtGui.QIcon(path_timer))
+
 
 
         # 在鼠標位置顯示菜單
@@ -205,24 +255,54 @@ class Deskpet(QWidget):
         if action == action_exit:
             self.close() 
             sys.exit(app.exec_()) # 如果選擇了 "退出"，則關閉窗口
+        if action == action_timer:
+           self.animation_type='Timer'
+           self.timer_counter=1
+           self.stop=True
+           self.open_timer_window()
+          
+
+    def open_timer_window(self):
+        """打開計時器視窗，確保計時結束時恢復桌寵運行"""
+        if not hasattr(self, "timer_window") or self.timer_window is None:
+            self.timer_window = timer_win.TimerWindow(self)
+
+        # ✅ 監聽 `finished` 事件，而不是 `destroyed`
+        self.timer_window.finished.connect(self.on_timer_window_closed)
+
+        self.stop = True  # 停止桌寵
+        self.timer_window.show()
+        
+
+    def on_timer_window_closed(self):
+        """當計時器視窗關閉時，恢復桌寵運行"""
+        print("[DEBUG] 計時視窗已關閉，桌寵恢復移動")
+        self.stop = False  # 恢復桌寵移動
+        self.timer_counter=0
+        print(f"[DEBUG] self.stop 設定為: {self.stop}")  # 確認 stop 狀態
+
+
     def random_move(self):
-        """讓桌寵隨機移動"""
-        if self.stop==False and self.animation_type=='walk':
+        """讓桌寵隨機移動，並確保計時視窗始終位於其正下方"""
+        
+        if self.stop is False and self.animation_type == 'walk':
             screen_geometry = QApplication.primaryScreen().availableGeometry()
             screen_width = screen_geometry.width()
             screen_height = screen_geometry.height()
 
-            # 隨機新位置
+            # 計算桌寵新位置
             new_x = random.randint(0, screen_width - self.width())
             new_y = random.randint(0, screen_height - self.height())
-            
-            # 動畫移動
+
+           
+
+            # 設定桌寵移動動畫
             self.animation = QPropertyAnimation(self, b"pos")
-            self.animation.setDuration(2000)  # 動畫持續時間 (毫秒)
+            self.animation.setDuration(2000)
             self.animation.setEndValue(QPoint(new_x, new_y))
             self.animation.start()
-        else:
-            pass
+
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
