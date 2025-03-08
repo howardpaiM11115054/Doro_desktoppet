@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QMenu,QMessageBox, QM
 import webbrowser
 from PyQt5 import QtGui
 import timer_win
+import schedual_EN_doro
 import os
 import sys
 import random
@@ -25,7 +26,8 @@ class Deskpet(QWidget):
         self.animation_type = 'walk'  # animation type
 
         # window for invisible
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.SubWindow)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint )
+        # | Qt.SubWindow
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         self.resize(900, 900)
 
@@ -110,12 +112,6 @@ class Deskpet(QWidget):
             self.nope_counter -= 1
             self.animation_type = 'Nope'
             return
-        if self.nope_counter > 0:
-            self.sleep_counter=0
-            self.dark_counter=0
-            self.nope_counter -= 1
-            self.animation_type = 'Nope'
-            return
         if self.death_counter > 0:
             self.death_counter -= 1
             self.animation_type = 'death'
@@ -128,7 +124,6 @@ class Deskpet(QWidget):
             self.dark_counter -= 1
             self.animation_type = 'dark'
             return
-        
         
         # 隨機選擇動畫類型
         if random.randint(1, 200) == 2:
@@ -184,8 +179,6 @@ class Deskpet(QWidget):
             self.nope_counter=30
             self.old_pos = None 
             
-            self.old_pos = None 
-            
             self.move(self.x() , self.y() )#反抗
             self.against-=1 # 清空舊位置
     # def mousePressEvent(self, event): 這樣會沒辦法拉
@@ -205,10 +198,9 @@ class Deskpet(QWidget):
         # 創建一個 QMenu
         self.setStyleSheet("QMenu{background:rgb(255,102,204);margin: 0;padding: 5px;border-radius: 20px;}"
                            "QMenu::item{background:rgb(255,189,255);}"
-                           "QMenu::separator{height:9px}")
-        self.setStyleSheet("QMenu{background:rgb(255,102,204);margin: 0;padding: 5px;border-radius: 20px;}"
-                           "QMenu::item{background:rgb(255,189,255);}"
-                           "QMenu::separator{height:9px}")
+                           "QMenu::separator{height:9px}"
+                           "QMenu::separator{border-radius: 10px}"
+                           )
         menu = QMenu(self)
         
 
@@ -219,6 +211,7 @@ class Deskpet(QWidget):
         action_move = menu.addAction("Move")
         action_timer=menu.addAction("time")
         action_link = menu.addAction("github")
+        action_schedual = menu.addAction("schedual")
 
         # 為 action_link 綁定觸發事件
         action_link.triggered.connect(self.open_website)
@@ -260,6 +253,8 @@ class Deskpet(QWidget):
            self.timer_counter=1
            self.stop=True
            self.open_timer_window()
+        if action == action_schedual:
+            self.open_schedual()
           
 
     def open_timer_window(self):
@@ -272,7 +267,29 @@ class Deskpet(QWidget):
 
         self.stop = True  # 停止桌寵
         self.timer_window.show()
-        
+    def open_schedual(self):
+        """Open the schedule window separately"""
+        self.schedual = schedual_EN_doro.CalendarPlanner()
+        self.schedual.show()  # ✅ Use show() instead of exec_()
+    # def open_schedual(self):
+    # """開啟行程視窗，確保 Deskpet 不會跟著關閉"""
+    
+    # # ✅ 如果 `self.schedual` 存在但已被刪除，就重新創建
+    # if hasattr(self, 'schedual') and self.schedual is not None:
+    #     if not self.schedual.isVisible():
+    #         self.schedual = schedual_EN_doro.CalendarPlanner()  # ✅ 重新創建新視窗
+    #         self.schedual.setAttribute(Qt.WA_DeleteOnClose, True)  # ✅ 關閉時刪除物件
+    #         self.schedual.show()
+    #     else:
+    #         self.schedual.activateWindow()  # ✅ 視窗還在時，讓它浮到最前
+    # else:
+    #     self.schedual = schedual_EN_doro.CalendarPlanner()  # ✅ 創建新視窗
+    #     self.schedual.setAttribute(Qt.WA_DeleteOnClose, True)
+    #     self.schedual.show()
+
+
+
+
 
     def on_timer_window_closed(self):
         """當計時器視窗關閉時，恢復桌寵運行"""
@@ -281,6 +298,7 @@ class Deskpet(QWidget):
         self.timer_counter=0
         print(f"[DEBUG] self.stop 設定為: {self.stop}")  # 確認 stop 狀態
 
+    
 
     def random_move(self):
         """讓桌寵隨機移動，並確保計時視窗始終位於其正下方"""
@@ -306,7 +324,8 @@ class Deskpet(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-
+    # ✅ 創建主應用視窗
+    
     # 創建 Deskpet 實例
     pet = Deskpet()
     pet.show()
