@@ -69,7 +69,9 @@ class TimerWindow(QDialog):
             if input_time <= 0:
                 raise ValueError  # 確保輸入為正數
             self.remaining_time = input_time
-            self.timer_label.setText(f"Time left: {self.remaining_time} s")
+            min_time=self.remaining_time//60
+            s_time=self.remaining_time%60
+            self.timer_label.setText(f"Time: {min_time:02d}:{s_time:02d} s")
             self.timer_label.setStyleSheet("font-size: 32px; font-weight: bold;")  # ✅ 設定字體大小
             # ✅ 隱藏輸入框與按鈕
             self.input_box.hide()
@@ -83,7 +85,10 @@ class TimerWindow(QDialog):
         """更新倒計時"""
         if self.remaining_time > 0:
             self.remaining_time -= 1
-            self.timer_label.setText(f"Time left: {self.remaining_time} s")
+            min_time=self.remaining_time//60
+            s_time=self.remaining_time%60
+            self.timer_label.setText(f"Time: {min_time:02d}:{s_time:02d} s")
+            self.timer_label.setStyleSheet("font-size: 32px; font-weight: bold;")  
         else:
             self.timer_label.setText("Time out！")
             self.timer.stop()  # 停止計時器

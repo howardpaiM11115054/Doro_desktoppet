@@ -1,5 +1,5 @@
-from PyQt5.QtCore import Qt, QTimer, QPropertyAnimation, QPoint
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt, QTimer, QPropertyAnimation, QPoint,QDate
+from PyQt5.QtGui import QPixmap,QTextCharFormat,QColor
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QMenu,QMessageBox, QMainWindow, QAction
 import webbrowser
 from PyQt5 import QtGui
@@ -8,6 +8,7 @@ import schedual_EN_doro
 import os
 import sys
 import random
+import json
 
 class Deskpet(QWidget):
     tool_name = 'Doro'
@@ -52,6 +53,20 @@ class Deskpet(QWidget):
         
         self.timer_move.timeout.connect(self.random_move)
         self.timer_move.start(2000)  # 每2秒移動一次
+
+       # ✅ 檢查今天是否有行程
+        self.schedule_manager = schedual_EN_doro.CalendarPlanner()  # ✅ 創建行程管理器
+        if self.schedule_manager.check_today_schedule():
+            self.mark_with_green_dot()  # ✅ 如果有行程，顯示綠點
+
+    def mark_with_green_dot(self):
+        """在 Deskpet 上顯示一個小綠點"""
+        self.dot_label = QLabel(self)
+        self.dot_label.setGeometry(40, 10, 20, 20)  # ✅ 設置綠點位置 (右上角)
+        self.dot_label.setStyleSheet("background-color: green; border-radius: 10px;")  # ✅ 圓形綠點
+        self.dot_label.show()  
+
+
     def start_timer(self):
         """開始倒數計時"""
         try:
@@ -229,7 +244,8 @@ class Deskpet(QWidget):
         action_link.setIcon(QtGui.QIcon(path_link))
         path_timer=os.path.join('img','icon','Timer.png')
         action_timer.setIcon(QtGui.QIcon(path_timer))
-
+        path_Dochedual=os.path.join('img','icon','Dochedual.png')
+        action_schedual.setIcon(QtGui.QIcon(path_Dochedual))
 
 
         # 在鼠標位置顯示菜單
@@ -287,7 +303,7 @@ class Deskpet(QWidget):
     #     self.schedual.setAttribute(Qt.WA_DeleteOnClose, True)
     #     self.schedual.show()
 
-
+    
 
 
 

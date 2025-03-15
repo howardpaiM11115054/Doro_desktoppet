@@ -50,6 +50,7 @@ class CalendarPlanner(QWidget):  # ✅ 繼承 QWidget，確保關閉時不影響
         
         # 🔹 Apply Styles
         self.apply_styles()
+        
 
     def mark_today(self):
         """Highlight today's date"""
@@ -58,6 +59,21 @@ class CalendarPlanner(QWidget):  # ✅ 繼承 QWidget，確保關閉時不影響
         highlight_format.setForeground(QColor("red"))  # Set red text color
         highlight_format.setBackground(QColor(255, 220, 220))  # Light red background
         self.calendar.setDateTextFormat(today, highlight_format)
+
+    def check_today_schedule(self):
+        """檢查今天是否有行程"""
+        try:
+            with open("schedule_data.json", "r") as file:
+                schedule_data = json.load(file)
+
+            today = QDate.currentDate().toString("yyyy-MM-dd")  # 獲取今天日期
+
+            return today in schedule_data  # ✅ 如果今天有行程，回傳 True，否則回傳 False
+
+        except (FileNotFoundError, json.JSONDecodeError):
+            return False  # ✅ 如果沒有行程檔案，回傳 False
+
+
 
     def show_schedule(self, date):
         """Display the schedule when a date is clicked"""
